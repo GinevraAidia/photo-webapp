@@ -10,6 +10,11 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  server: {
+    watch: {
+      usePolling: process.platform === 'win32' || process.env.CHOKIDAR_USEPOLLING === 'true',
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

@@ -1,19 +1,24 @@
 services:
   frontend:
     build: 
-      context: /frontend
+      context: frontend
     ports:
       - "5173:5173"
     depends_on:
       - backend
+    volumes:
+      - ./frontend/src:/app/src:ro
+    environment:
+      - CHOKIDAR_USEPOLLING=${OS:+true}
   backend:
     build: 
-      context: /backend
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      context: backend
     ports:
       - "8000:8000"
     depends_on:
       - db
+    volumes:
+      - ./backend:/app
   db:
     image: postgres:18
     container_name: postgres-dev
