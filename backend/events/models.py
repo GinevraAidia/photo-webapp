@@ -17,10 +17,9 @@ class Post(models.Model):
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='posts', on_delete=models.CASCADE)
     description = models.TextField(blank=True, default='')
     image=models.ImageField(upload_to='images/', blank=True, null=True)
-    uploaded_at= models.DateTimeField(auto_now_add=True)
-    date=(str,uploaded_at) 
+    uploaded_at= models.DateTimeField(auto_now_add=True) 
     def __str__(self):
-     return f"{self.description} {self.uploaded_at:%d/%m/%Y %H:%M} - {self.uploader.username} - {self.event}"
+        return f"{self.description} {self.uploaded_at:%d/%m/%Y %H:%M} - {self.uploader.username} - {self.event}"
 
 class Reaction(models.Model):
     post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)

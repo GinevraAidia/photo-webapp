@@ -1,9 +1,13 @@
-from django.urls import path
-from . import views
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+from .views import EventViewSet, PostViewSet, ReactionViewSet, EventShareViewSet
 
-urlpatterns=[
-    path('event/', views.EventViewSet.as_view({'get': 'list'}), name='event-list'),
-    path('post/', views.PostViewSet.as_view({'get':'list'}),name='post-list'),
-    path('reaction/',views.ReactionViewSet.as_view({'get':'list'}),name='reaction-list'),
-    path('eventShare/',views.EventShareViewSet.as_view({'get':'list'}),name='eventShare-list')
+router = DefaultRouter()
+router.register(r'event', EventViewSet, basename='event')
+router.register(r'post', PostViewSet, basename='post')
+router.register(r'reaction', ReactionViewSet, basename='reaction')
+router.register(r'eventShare', EventShareViewSet, basename='eventshare')
+
+urlpatterns = [
+    path('', include(router.urls)), 
 ]
