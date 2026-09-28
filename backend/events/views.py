@@ -17,7 +17,7 @@ class EventViewSet(viewsets.ModelViewSet):
             user = self.request.user
             if user.is_anonymous:
                 raise PermissionDenied("You must be logged in to view events.") 
-            return Event.objects.filter(Q(visibility="public") | Q(owner=user))
+            return Event.objects.filter(Q(visibility="public") | Q(owner=user) | Q(user=user)).distinct()
     
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
