@@ -1,3 +1,50 @@
 from django.db import models
-
+from django.conf import settings
 # Create your models here.
+class Event(models.Model):
+    class Visibility(models.TextChoices):
+            PRIVATE="private", "Private"
+            PUBLIC="public", "Public"
+    visibility=models.CharField(max_length=255, choices=Visibility.choices, default=Visibility.PRIVATE) 
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='events', on_delete=models.CASCADE)
+    title= models.CharField(max_length=255)
+    description = models.TextField(blank=True, default='')
+    def __str__(self):
+         return self.title,self.description,self.visibility,self.owner
+
+class Post(models.Model):
+    event=models.ForeignKey(Event, related_name='posts', on_delete=models.CASCADE)
+    uploader = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='posts', on_delete=models.CASCADE)
+    description = models.TextField(blank=True, default='')
+    image=models.ImageField(upload_to='images/')
+    uploaded_ad= models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+         return self.description,self.uploaded_ad,self.uploader,self.event
+
+class Reaction(models.Model):
+    post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reactions', on_delete=models.CASCADE)
+    class emoji(models.TextChoices):
+        LIKE="👍", "Like"
+        DISLIKE="👎", "Dislike"
+        HEART="❤️", "Heart"
+        LAUGH="😂", "Laugh"
+    emoji=models.CharField(max_length=255, choices=emoji.choices, default=emoji.LIKE)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['post', 'user'], 
+                name='unique_user_reaction_per_post'
+            )
+        ]
+
+    def __str__(self):
+         return self.emoji,self.user,self.post
+
+class EventShare(models.Model):
+    event=models.ForeignKey(Event, related_name='event_shares', on_delete=models.CASCADE)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_shares', on_delete=models.CASCADE)
+    #dovrei usare la mail? o considero che gli utenti siano già tutti registrati?
+    #email=models.EmailField()
+    def __str__(self):
+         return self.user,self.event

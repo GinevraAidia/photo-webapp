@@ -18,11 +18,22 @@ Reazioni emoji sulle foto. Niente commenti. Niente registrazione pubblica (accou
 4. **Tutti i partecipanti** autorizzati possono caricare foto; il proprietario può rimuovere foto e revocare condivisioni.
 5. Homepage = griglia di "cartelle" con **tutti gli eventi accessibili**: pubblici + privati condivisi con l'utente. Nessuna pagina "Esplora" separata.
 
-## Modello dati (nuova app `events`)
-- `Event`: `title`, `description?`, `date?`, `owner` FK User, `visibility` (private|public, default private), `created_at`
+## Fix bloccante attuale (Pillow nel container)
+Il backend gira in Docker: l'immagine installa solo i pacchetti di `backend/requirements.txt`. Pillow installato nella venv locale non esiste nel container → `fields.E210`.
+1. Aggiungere `Pillow` a `backend/requirements.txt` (es. `Pillow==11.3.0`)
+2. Ricreare l'immagine: `docker compose -f docker-compose.dev.yml up --build backend` (basta `docker compose restart`, senza rebuild non cambia nulla)
+
+Correzioni sui modelli già scritti in `backend/events/models.py` (nome `Post` per le foto, accettato):
+- `__str__` di `Event`, `Post`, `Reaction`, `EventShare` ritornano tuple → crash in admin; restituire stringa (es. f-string con i campi principali)
+- `EventShare`: sostituire FK `user` con `email = models.EmailField()` + unique `(event, email)` — risponde al commento nel codice: si usa l'email, così un account creato dopo dall'admin (stessa email) ottiene l'accesso senza nuovi record
+- `Post.uploaded_ad` → `uploaded_at` (typo, + migrazione)
+- `Reaction`: confermato unique `(post, user)` = una sola reazione per utente per foto (semplificazione accettata rispetto a più emoji); rinominare la nested class `emoji` in `Emoji` per chiarezza
+
+## Modello dati (app `events`, implementazione attuale)
+- `Event`: `title`, `description?`, `owner` FK User, `visibility` (private|public, default private) — campo `date?` opzionale, rimandabile
 - `EventShare`: `event` FK, `email` (lowercase), `created_at`; unique `(event, email)`. L'accesso si risolve a runtime: `User.email ∈ EventShare` (così un account creato dopo dall'admin ottiene subito accesso)
-- `Photo`: `event` FK, `uploader` FK User, `image` (ImageField), `description` (testo, opzionale), `uploaded_at`
-- `Reaction`: `photo` FK, `user` FK, `emoji` (choices da set fisso), `created_at`; unique `(photo, user, emoji)`
+- `Post` (la foto): `event` FK, `uploader` FK User, `image` (ImageField), `description` (testo, opzionale), `uploaded_at`
+- `Reaction`: `post` FK, `user` FK, `emoji` (choices da set fisso), unique `(post, user)` = una reazione per utente; POST la crea/aggiorna (toggle)
 
 ## Matrice permessi API
 | Azione | Chi |
@@ -36,7 +47,7 @@ Reazioni emoji sulle foto. Niente commenti. Niente registrazione pubblica (accou
 
 ## Attività backend (in ordine)
 1. `settings.py`: DB Postgres via env (`DB_NAME/DB_USER/DB_PASSWORD/DB_HOST/DB_PORT`, già presenti in `docker-compose.prod.yml`), `MEDIA_ROOT/MEDIA_URL`, `rest_framework` + SimpleJWT, `corsheaders` (allow `localhost:5173`), `EMAIL_*` da env (console in dev, SMTP in prod)
-2. `requirements.txt`: aggiungere `djangorestframework-simplejwt`, `psycopg[binary]`, `django-cors-headers`, `Pillow`
+2. `requirements.txt`: aggiungere `djangorestframework-simplejwt`, `django-cors-headers`, `Pillow` (già presenti: `psycopg[binary]`)
 3. Creare app `events` con i 4 modelli sopra + migrazioni
 4. Serializers + ViewSets + router:
    - `POST /api/auth/token/`, `POST /api/auth/token/refresh/` (SimpleJWT)
