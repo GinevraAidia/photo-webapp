@@ -21,6 +21,7 @@ services:
       - db
     volumes:
       - ./backend:/app
+      - media_data:/app/media #volume for media files
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -41,3 +42,4 @@ services:
 
 volumes:
   postgres_data:
+  media_data:

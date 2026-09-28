@@ -10,16 +10,17 @@ class Event(models.Model):
     title= models.CharField(max_length=255)
     description = models.TextField(blank=True, default='')
     def __str__(self):
-         return self.title,self.description,self.visibility,self.owner
+         return self.title+self.description+self.visibility+self.owner.username
 
 class Post(models.Model):
     event=models.ForeignKey(Event, related_name='posts', on_delete=models.CASCADE)
     uploader = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='posts', on_delete=models.CASCADE)
     description = models.TextField(blank=True, default='')
-    image=models.ImageField(upload_to='images/')
-    uploaded_ad= models.DateTimeField(auto_now_add=True)
+    image=models.ImageField(upload_to='images/', blank=True, null=True)
+    uploaded_at= models.DateTimeField(auto_now_add=True)
+    date=(str,uploaded_at) 
     def __str__(self):
-         return self.description,self.uploaded_ad,self.uploader,self.event
+     return f"{self.description} {self.uploaded_at:%d/%m/%Y %H:%M} - {self.uploader.username} - {self.event}"
 
 class Reaction(models.Model):
     post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)
@@ -39,7 +40,7 @@ class Reaction(models.Model):
         ]
 
     def __str__(self):
-         return self.emoji,self.user,self.post
+         return self.emoji+self.user.username+self.post.description
 
 class EventShare(models.Model):
     event=models.ForeignKey(Event, related_name='event_shares', on_delete=models.CASCADE)
@@ -47,4 +48,4 @@ class EventShare(models.Model):
     #dovrei usare la mail? o considero che gli utenti siano già tutti registrati?
     #email=models.EmailField()
     def __str__(self):
-         return self.user,self.event
+        return self.user.username+self.event.description
