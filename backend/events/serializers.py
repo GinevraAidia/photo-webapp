@@ -16,7 +16,3 @@ class ReactionSerializer(serializers.ModelSerializer):
         model= Reaction
         fields = '__all__'
 
-class EventShareSerializer(serializers.ModelSerializer):
-    class Meta:
-        model= EventShare
-        fields = '__all__'

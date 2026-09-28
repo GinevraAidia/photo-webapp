@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 # Create your models here.
+
+
 class Event(models.Model):
     class Visibility(models.TextChoices):
             PRIVATE="private", "Private"
@@ -9,8 +11,9 @@ class Event(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='events', on_delete=models.CASCADE)
     title= models.CharField(max_length=255)
     description = models.TextField(blank=True, default='')
+    user=models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='events_joined')
     def __str__(self):
-         return self.title+self.description+self.visibility+self.owner.username
+        return f"title: {self.title} |description:{self.description} |visibility:{self.visibility} |username:{self.owner.username}"
 
 class Post(models.Model):
     event=models.ForeignKey(Event, related_name='posts', on_delete=models.CASCADE)
@@ -19,7 +22,7 @@ class Post(models.Model):
     image=models.ImageField(upload_to='images/', blank=True, null=True)
     uploaded_at= models.DateTimeField(auto_now_add=True) 
     def __str__(self):
-        return f"{self.description} {self.uploaded_at:%d/%m/%Y %H:%M} - {self.uploader.username} - {self.event}"
+        return f"description: {self.description} |time uploaded:{self.uploaded_at:%d/%m/%Y %H:%M} |from:{self.uploader.username} |in event:{self.event}"
 
 class Reaction(models.Model):
     post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)
@@ -39,12 +42,4 @@ class Reaction(models.Model):
         ]
 
     def __str__(self):
-         return self.emoji+self.user.username+self.post.description
-
-class EventShare(models.Model):
-    event=models.ForeignKey(Event, related_name='event_shares', on_delete=models.CASCADE)
-    user=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='event_shares', on_delete=models.CASCADE)
-    #dovrei usare la mail? o considero che gli utenti siano già tutti registrati?
-    #email=models.EmailField()
-    def __str__(self):
-        return self.user.username+self.event.description
+         return f"user:{self.user.username} |emoji:{self.emoji} |post:{self.post.description}"
