@@ -2,7 +2,8 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+import debugpy
+from config import settings
 
 def main():
     """Run administrative tasks."""
@@ -20,3 +21,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+if settings.DEBUG:
+    import debugpy  # noqa: T100
+
+    debugpy.listen(("0.0.0.0", 5678))  # noqa: 
