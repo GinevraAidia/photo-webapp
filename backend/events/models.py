@@ -13,7 +13,7 @@ class Event(models.Model):
     description = models.TextField(blank=True, default='')
     user=models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='events_joined',blank=True)
     def __str__(self):
-        return f"title: {self.title} |description:{self.description} |visibility:{self.visibility} |username:{self.owner.username}"
+        return f"TITLE: {self.title} | DESCRIPTION: {self.description} | VISIBILITY: {self.visibility} | USERNAME: {self.owner.username}"
 
 class Post(models.Model):
     event=models.ForeignKey(Event, related_name='posts', on_delete=models.CASCADE)
@@ -22,7 +22,7 @@ class Post(models.Model):
     image=models.ImageField(upload_to='images/', blank=True, null=True)
     uploaded_at= models.DateTimeField(auto_now_add=True) 
     def __str__(self):
-        return f"description: {self.description} |time uploaded:{self.uploaded_at:%d/%m/%Y %H:%M} |from:{self.uploader.username} |in event:{self.event}"
+        return f"DESCRIPTION: {self.description} | FROM: {self.uploader.username} | IN EVENT: {self.event.id}"
 
 class Reaction(models.Model):
     post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)
@@ -42,4 +42,4 @@ class Reaction(models.Model):
         ]
 
     def __str__(self):
-         return f"user:{self.user.username} |emoji:{self.emoji} |post:{self.post.description}"
+         return f"USER: {self.user.username} | EMOJI: {self.emoji} | POST: {self.post.description}"
