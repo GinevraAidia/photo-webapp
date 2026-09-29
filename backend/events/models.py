@@ -11,7 +11,7 @@ class Event(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='events', on_delete=models.CASCADE)
     title= models.CharField(max_length=255)
     description = models.TextField(blank=True, default='')
-    user=models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='events_joined')
+    user=models.ManyToManyField(settings.AUTH_USER_MODEL,related_name='events_joined',blank=True)
     def __str__(self):
         return f"title: {self.title} |description:{self.description} |visibility:{self.visibility} |username:{self.owner.username}"
 
