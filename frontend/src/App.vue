@@ -1,11 +1,26 @@
-<script setup lang="ts"></script>
 
 <template>
-  <h1>pippo!!!!!!!!!!!!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div id="container">
+    <AppBar></AppBar>
+    <RouterView />
+  </div>
+  
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import { RouterView } from 'vue-router';
+import { ref } from 'vue';
+import AppBar from './components/AppBar.vue';
+import './styles/main.css';
+import '@/styles/gridCard.css'
+const isVisible = ref(true);
+</script>
+
+<style scoped>
+h1{
+  text-align: center;
+}
+#container{
+  padding-top: 100px;
+}
+</style>

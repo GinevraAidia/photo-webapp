@@ -28,10 +28,10 @@ class Reaction(models.Model):
     post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)
     user=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reactions', on_delete=models.CASCADE)
     class emoji(models.TextChoices):
-        LIKE="👍", "Like"
-        DISLIKE="👎", "Dislike"
-        HEART="❤️", "Heart"
-        LAUGH="😂", "Laugh"
+        LIKE="like", "Like"
+        DISLIKE="dislike", "Dislike"
+        HEART="heart", "Heart"
+        LAUGH="laugh", "Laugh"
     emoji=models.CharField(max_length=255, choices=emoji.choices, default=emoji.LIKE)
     class Meta:
         constraints = [
