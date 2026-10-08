@@ -3,7 +3,7 @@ from xml.dom import ValidationErr
 from rest_framework import viewsets,permissions
 from rest_framework import status
 from rest_framework.response import Response
-from events.services import EventService, PostService, ReactionService
+from events.services import EventService, PostService, PostReactionService
 from events.models import *
 from .serializers import *
 from .permission import *
@@ -75,14 +75,19 @@ class PostViewSet(viewsets.ModelViewSet):
             actor=self.request.user
         )
         
-
 class ReactionViewSet(viewsets.ModelViewSet):
+    queryset = Reaction.objects.all().order_by("id")
+    serializer_class = ReactionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = None
+
+class PostReactionViewSet(viewsets.ModelViewSet):
     serializer_class = ReactionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     http_method_names=["get","post","delete","head","options"]
     def get_queryset(self):
-        queryset = Reaction.objects.filter(
+        queryset = PostReaction.objects.filter(
             post__event__in=can_view_event(
                 self.request.user
             )
@@ -102,7 +107,7 @@ class ReactionViewSet(viewsets.ModelViewSet):
         post = serializer.validated_data["post"]
         emoji = serializer.validated_data["emoji"]
 
-        reaction, created = ReactionService.set_reaction(
+        reaction, created = PostReactionService.set_reaction(
             post=post,
             user=request.user,
             emoji=serializer.validated_data["emoji"]
@@ -120,7 +125,7 @@ class ReactionViewSet(viewsets.ModelViewSet):
         )
 
     def perform_destroy(self, instance):
-        ReactionService.delete_reaction(
+        PostReactionService.delete_reaction(
             reaction=instance,
             actor=self.request.user
         )

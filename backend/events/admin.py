@@ -4,5 +4,5 @@ from .models import *
 # Register your models here.
 admin.site.register(Post)
 admin.site.register(Event)
-#admin.site.register(EventShare)
 admin.site.register(Reaction)
+admin.site.register(PostReaction)

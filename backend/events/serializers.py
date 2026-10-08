@@ -31,16 +31,38 @@ class EventSerializer(serializers.ModelSerializer):
         model= Event
         fields=['id','owner','title','description','visibility','users']
 
+
 class ReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Reaction
+        fields=["id","name","symbol"]
+
+class PostReactionSerializer(serializers.ModelSerializer):
     username_utente = serializers.CharField(
         source="user.username",
         read_only=True
     )
 
+    reaction_name = serializers.CharField(
+        source="reaction.name",
+        read_only=True
+    )
+
+    reaction_symbol = serializers.CharField(
+        source="reaction.symbol",
+        read_only=True
+    )
+
     class Meta:
-        model= Reaction
-        fields = ['id','post','emoji','username_utente']
-        read_only_fields=['id','username_utente']
+        model = PostReaction
+        fields = [
+            "id",
+            "post",
+            "reaction",
+            "reaction_name",
+            "reaction_symbol",
+            "username_utente"
+        ]
         
     def get_username_utente(self, obj):
         if obj.user:

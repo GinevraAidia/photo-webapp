@@ -1,6 +1,6 @@
 from django.db import transaction
 from .permission import can_upload_to_event, can_view_post
-from events.models import Event, Post, Reaction
+from events.models import Event, Post, PostReaction, Reaction
 from rest_framework.exceptions import PermissionDenied
 
 class EventService:
@@ -88,20 +88,20 @@ class PostService:
 
         post.delete()
 
-class ReactionService:
+class PostReactionService:
     @staticmethod
     @transaction.atomic
-    def set_reaction(*, post, user, emoji):
+    def set_reaction(*, post, user, reaction):
 
         if not can_view_post(user, post):
             raise PermissionDenied(
                 "Non puoi reagire a questo post."
             )
 
-        reaction, created = Reaction.objects.update_or_create(
+        reaction, created = PostReaction.objects.update_or_create(
             post=post,
             user=user,
-            defaults={"emoji": emoji}
+            defaults={"reaction": reaction}
         )
 
         return reaction, created
