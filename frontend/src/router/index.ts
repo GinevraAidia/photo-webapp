@@ -29,8 +29,8 @@ const router = createRouter({
 })
 router.beforeEach((to) => {
   const authStore = useAuthStore()
-  if( to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return '/login' //se non è autenticato lo rimando alla pagina di login
+  if (to.meta.requiresAuth &&!authStore.hasSession) {
+  return '/login'
   }
 })
 export default router

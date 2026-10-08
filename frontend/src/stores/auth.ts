@@ -1,48 +1,45 @@
 import { defineStore } from 'pinia'
-//import axios from 'axios'
-import api from '@/services/api'
-interface AuthState {
-  //sono i token che mi vengono restituiti dal front
-  accessToken: string | null
-  refreshToken: string | null
-  user: any | null
-}
+import axios from 'axios'
+
+import { tokenService } from '@/services/tokenService'
+
+const baseURL =
+  import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => ({
-    // mem nel local storage i token così se l'utente ricarica la pagina non deve rifare il login
-    accessToken: localStorage.getItem('access_token'),
-    refreshToken: localStorage.getItem('refresh_token'),
-    user: null,
+  state: () => ({
+    accessToken: tokenService.getAccess(),
+    refreshToken: tokenService.getRefresh()
   }),
 
-  getters: { //si ricalcola autom ogni volta che cambia lo stato
-    //il !! converte ogni valore in booleano
-    isAuthenticated: (state) => !!state.accessToken,
+  getters: {
+    hasSession: state => !!state.refreshToken
   },
 
   actions: {
-    async login(credentials: { username: string; password: string }) {
-      const response = await api.post('/api/token/', credentials)
-      
+    async login(credentials: {
+      username: string
+      password: string
+    }) {
+      // Client senza interceptor di autenticazione
+      const response = await axios.post(
+        `${baseURL}/api/token/`,
+        credentials
+      )
+
       const { access, refresh } = response.data
-      console.log(response.data)
+
+      tokenService.setTokens(access, refresh)
+
       this.accessToken = access
       this.refreshToken = refresh
-
-      localStorage.setItem('access_token', access)
-      localStorage.setItem('refresh_token', refresh)
-
-      api.defaults.headers.common['Authorization'] = `Bearer ${access}`
     },
 
     logout() {
+      tokenService.clear()
+
       this.accessToken = null
       this.refreshToken = null
-      this.user = null
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      delete api.defaults.headers.common['Authorization']
     }
   }
 })

@@ -25,21 +25,22 @@ class Post(models.Model):
         return f"DESCRIPTION: {self.description} | FROM: {self.uploader.username} | IN EVENT: {self.event.id}"
 
 class Reaction(models.Model):
-    post=models.ForeignKey(Post, related_name='reactions', on_delete=models.CASCADE)
-    user=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='reactions', on_delete=models.CASCADE)
-    class emoji(models.TextChoices):
-        LIKE="like", "Like"
-        DISLIKE="dislike", "Dislike"
-        HEART="heart", "Heart"
-        LAUGH="laugh", "Laugh"
-    emoji=models.CharField(max_length=255, choices=emoji.choices, default=emoji.LIKE)
-    class Meta:
+    name=models.CharField(max_length=50,unique=True)
+    symbol=models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+    
+class PostReaction(models.Model):
+     post=models.ForeignKey(Post, related_name='post_reactions', on_delete=models.CASCADE)
+     user=models.ForeignKey(settings.AUTH_USER_MODEL, related_name='post_reactions', on_delete=models.CASCADE)
+     reaction=models.ForeignKey(Reaction, related_name='post_reactions', on_delete=models.PROTECT)
+     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['post', 'user'], 
                 name='unique_user_reaction_per_post'
             )
         ]
-
-    def __str__(self):
-         return f"USER: {self.user.username} | EMOJI: {self.emoji} | POST: {self.post.description}"
+        def __str__(self):
+            return f"{self.user} - {self.reaction} - {self.post_id}"

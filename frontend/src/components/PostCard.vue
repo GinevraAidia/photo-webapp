@@ -1,4 +1,126 @@
 <template>
+  <article class="cardPost">
+    <img
+      v-if="post.image"
+      :src="post.image"
+      alt="Immagine del post"
+    />
+
+    <h2>{{ post.description }}</h2>
+    <p>{{ post.username_utente }}</p>
+
+    <ReactionPicker @selected="react" />
+
+    <ReactionList :reactions="reactions" />
+
+    <button @click="editing = true">
+      Modifica
+    </button>
+
+    <button @click="deletePost">
+      Elimina
+    </button>
+
+    <p v-if="errorMessage" role="alert">
+      {{ errorMessage }}
+    </p>
+
+    <div v-if="editing" class="modal-overlay">
+      <PostForm
+        :key="post.id"
+        :initial-description="post.description"
+        :loading="loading"
+        submit-label="Salva modifiche"
+        @submit="updatePost"
+        @cancel="editing = false"
+      />
+    </div>
+  </article>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import type { Post, Reaction, Emoji } from '@/types/post'
+
+import PostForm from './PostForm.vue'
+import ReactionPicker from './ReactionPicker.vue'
+import ReactionList from './ReactionList.vue'
+
+import { postService } from '@/services/postService'
+import { reactionService } from '@/services/reactionService'
+
+const props = defineProps<{
+  post: Post
+}>()
+
+const emit = defineEmits<{
+  deleted: [id: number]
+  updated: [post: Post]
+}>()
+
+const reactions = ref<Reaction[]>([])
+const editing = ref(false)
+const loading = ref(false)
+const errorMessage = ref('')
+
+async function loadReactions() {
+  reactions.value = await reactionService.getByPost(
+    props.post.id
+  )
+}
+
+async function react(emoji: Emoji) {
+  try {
+    await reactionService.setReaction(props.post.id, emoji)
+    await loadReactions()
+  } catch {
+    errorMessage.value = 'Impossibile salvare la reazione.'
+  }
+}
+
+async function updatePost(data: {
+  description: string
+  image: File | null
+}) {
+  loading.value = true
+
+  try {
+    const updated = await postService.update(
+      props.post.id,
+      data
+    )
+
+    emit('updated', updated)
+    editing.value = false
+  } catch {
+    errorMessage.value = 'Errore durante la modifica.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function deletePost() {
+  if (!window.confirm('Eliminare questo post?')) {
+    return
+  }
+
+  try {
+    await postService.delete(props.post.id)
+    emit('deleted', props.post.id)
+  } catch {
+    errorMessage.value = 'Errore durante l’eliminazione.'
+  }
+}
+
+onMounted(loadReactions)
+</script>
+
+
+
+
+
+
+<!-- <template>
     <div class="cardPost">
         <img v-if="image" :src="image" :alt="title" />
         <div class="card-title">
@@ -70,6 +192,9 @@ const props=defineProps({
     description: String,
     image: String
 })
+const emit=defineEmits<{
+    deleted:[id:number]
+}>()
 const isModifing = ref(false)
 const oldPost = ref({
     description: '',
@@ -121,7 +246,7 @@ async function eliminaPost() {
     alert("Sicuro di voler eliminare il post? verranno eliminati anche tutte le reazioni associate.\n Attenzione solo il proprietario dell'evento è autorizzato a farlo")
     try{
         await api.delete(`/events/post/${props.id}/`)
-        window.location.reload()
+        emit('deleted',props.id?? -1)
     }catch(error){
         console.log(error)
         alert("Errore durante l'eliminazione del post")
@@ -152,4 +277,4 @@ function gestisciCaricamento(event: Event) {
 onMounted(async()=>{
     getReactions()
 })
-</script>
+</script> -->
