@@ -1,16 +1,9 @@
 <script setup lang="ts">
-import type { Reaction, Emoji } from '@/types/post'
+import type { PostReaction } from '@/types/post'
 
 defineProps<{
-  reactions: Reaction[]
+  reactions: PostReaction[]
 }>()
-
-const emojiMap: Record<Emoji, string> = {
-  like: '👍',
-  dislike: '👎',
-  heart: '❤️',
-  laugh: '😂'
-}
 </script>
 
 <template>
@@ -21,7 +14,7 @@ const emojiMap: Record<Emoji, string> = {
       class="reaction-item"
     >
       <span>{{ reaction.username_utente }}</span>
-      <span>{{ emojiMap[reaction.emoji] }}</span>
+      <span>{{ reaction.reaction_symbol }}</span>
     </div>
   </div>
 </template>

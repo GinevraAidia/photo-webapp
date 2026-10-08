@@ -1,26 +1,35 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { Emoji } from '@/types/post'
+import { onMounted, ref } from 'vue'
+import type { ReactionType } from '@/types/post'
+import { reactionService } from '@/services/reactionService'
 
 const emit = defineEmits<{
-  selected: [emoji: Emoji]
+  selected: [reactionId:number]
 }>()
 
-const selected = ref<Emoji | ''>('')
+const reactions= ref<ReactionType[]>([])
+const selected = ref<number | ''>('')
 
 function onChange() {
   if (selected.value) {
     emit('selected', selected.value)
   }
 }
+onMounted(async () => {
+  reactions.value= await reactionService.getTypes()
+  })
 </script>
 
 <template>
   <select v-model="selected" @change="onChange">
     <option value="" disabled>Reagisci</option>
-    <option value="like">👍</option>
-    <option value="dislike">👎</option>
-    <option value="heart">❤️</option>
-    <option value="laugh">😂</option>
+
+    <option
+      v-for="reaction in reactions"
+      :key="reaction.id"
+      :value="reaction.id"
+    >
+      {{ reaction.symbol }}
+    </option>
   </select>
 </template>

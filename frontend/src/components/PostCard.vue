@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { Post, Reaction, Emoji } from '@/types/post'
+import type { Post, PostReaction } from '@/types/post'
 
 import PostForm from './PostForm.vue'
 import ReactionPicker from './ReactionPicker.vue'
@@ -58,7 +58,7 @@ const emit = defineEmits<{
   updated: [post: Post]
 }>()
 
-const reactions = ref<Reaction[]>([])
+const reactions = ref<PostReaction[]>([])
 const editing = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
@@ -69,9 +69,9 @@ async function loadReactions() {
   )
 }
 
-async function react(emoji: Emoji) {
+async function react(reactionId: number) {
   try {
-    await reactionService.setReaction(props.post.id, emoji)
+    await reactionService.setReaction(props.post.id, reactionId)
     await loadReactions()
   } catch {
     errorMessage.value = 'Impossibile salvare la reazione.'

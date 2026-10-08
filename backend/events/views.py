@@ -82,7 +82,7 @@ class ReactionViewSet(viewsets.ModelViewSet):
     pagination_class = None
 
 class PostReactionViewSet(viewsets.ModelViewSet):
-    serializer_class = ReactionSerializer
+    serializer_class = PostReactionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     http_method_names=["get","post","delete","head","options"]
@@ -100,20 +100,20 @@ class PostReactionViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         post = serializer.validated_data["post"]
-        emoji = serializer.validated_data["emoji"]
+        reaction_type = serializer.validated_data["reaction"]
 
-        reaction, created = PostReactionService.set_reaction(
+        post_reaction, created = PostReactionService.set_reaction(
             post=post,
             user=request.user,
-            emoji=serializer.validated_data["emoji"]
+            reaction=reaction_type
         )
 
-        output = self.get_serializer(reaction)
+        output = self.get_serializer(post_reaction)
 
         return Response(
             output.data,
