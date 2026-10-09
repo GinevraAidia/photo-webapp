@@ -1,87 +1,18 @@
 <template>
     <div class="cardEvent">
         <div @click="gestisciClick()" >
-                <div class="card-title"><h1>{{titolo}}</h1></div>
-                <div class="card-description"><p>{{ descrizione }}</p></div>
-                <div class="card-text"><p>{{ visibilita }}</p></div>
+                <div class="rounded-full border border-dashed border-indigo-300
+         bg-indigo-50/40 px-5 py-3
+         hover:border-[1.5px] hover:border-[#df73ff]"><h1>{{titolo}}</h1></div>
+                <div class="card-description,max-w-xs truncate px-6 py-4 text-gray-600"><p>{{ descrizione }}</p></div>
+                <div class="card-text"><p><span :class="visibilita === 'public' ? 'bg-green-100 text-green-700': 'bg-purple-100 text-purple-700'" class="rounded-full px-3 py-1 text-xs font-medium">{{ visibilita === 'public' ? 'Pubblico' : 'Privato' }}
+      </span></p></div>
         </div>
         <div class="card-buttons">
-                <button @click="modificaEvent">Modifica</button>
-                <button @click="eliminaEvent">Elimina</button>
+                <button @click="emit('edit', eventId)">Modifica</button>
+                <button @click="emit('delete', eventId)">Elimina</button>
         </div>
     </div>
-    <div v-if="isModifying" class="modal-overlay">
-    <div class="event-form" @click.stop>
-
-        <button class="close-btn" @click="closeForm">×</button>
-
-        <h2>Modifica evento</h2>
-
-        <form @submit.prevent="salvaModifica">
-
-            <input
-                type="text"
-                placeholder="Titolo"
-                v-model="editTitle"
-            >
-
-            <input
-                type="text"
-                placeholder="Descrizione"
-                v-model="editDescription"
-            >
-
-            <select v-model="editVisibility">
-                <option disabled value="">
-                    Seleziona la visibilità
-                </option>
-
-                <option value="public">
-                    Pubblico
-                </option>
-
-                <option value="private">
-                    Privato
-                </option>
-            </select>
-
-            <span>Seleziona gli utenti</span>
-
-            <select v-model="usernameChosen" @change="addUserToList">
-                <option disabled :value="null">
-                    Seleziona un utente
-                </option>
-
-                <option
-                    v-for="user in users"
-                    :key="user.id"
-                    :value="user.id"
-                >
-                    {{ user.username }}
-                </option>
-            </select>
-
-            <div v-if="editUsers.length > 0">
-                <p>Utenti selezionati:</p>
-
-                <ul>
-                    <li
-                        v-for="userId in editUsers"
-                        :key="userId"
-                    >
-                        {{ getUsername(userId) }}
-                    </li>
-                </ul>
-            </div>
-
-            <button type="submit">
-                Salva modifiche
-            </button>
-
-        </form>
-
-    </div>
-</div>
 
 </template>
 <script setup lang="ts">
@@ -111,6 +42,11 @@ const props = defineProps<{
     eventUsers: number[]
     users: User[]
 }>()
+const emit = defineEmits<{
+  edit: [id: number]
+  delete: [id: number]
+}>()
+
 function gestisciClick() {
     router.push({ path: '/posts', query: { event: String(props.eventId) } })
 }

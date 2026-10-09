@@ -39,7 +39,7 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer.instance=event
         
     def perform_destroy(self, instance):
-        EventService.delete_event(instance, self.request.user)
+        EventService.delete_event(event=instance,actor=self.request.user)
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer

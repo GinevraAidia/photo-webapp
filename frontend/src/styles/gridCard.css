@@ -12,7 +12,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    border: 1px dotted #8594e4;
+    border: 1px dotted #BEDBFF;
     border-radius: 12px;
     background: white;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -20,20 +20,20 @@
     cursor:pointer;
 }
 
-.card:hover {
-  border: 1.5px dotted #df73ff;
-}
 .card-text{
   padding: 5px;
 }
 .card-title{
   font-weight: bold;
-  border: dotted 1px #8594e4;
+  border: dotted 1px #BEDBFF;
   border-radius: 5px;
   padding: 5px;
   display: flex;
   justify-content: center; /* orizzontale */
   align-items: center;     /* verticale */
+}
+.card-title:hover{
+    border: 2px dashed #df73ff
 }
 .card-description {
   height: 80px;
@@ -53,10 +53,11 @@
 .card-buttons button {
   flex: 1;
   padding: 10px;
+  margin-top:20px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background-color: #8594e4;
+  background-color: #BEDBFF;
 }
 .card-buttons button:hover {
   background-color: #df73ff;
@@ -73,7 +74,7 @@
     flex-direction: column;
     gap: 12px;
     background-color: white;
-    border: 1px dotted #8594e4;
+    border: 1px dotted #BEDBFF;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     overflow: hidden;
@@ -129,7 +130,7 @@
     width: 100%;
     padding: 8px;
     box-sizing: border-box;
-    border: 1px solid #8594e4;
+    border: 1px solid #BEDBFF;
     border-radius: 8px;
     background-color: white;
     cursor: pointer;

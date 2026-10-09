@@ -6,7 +6,13 @@
         <span class="self-center text-xl text-heading font-semibold whitespace-nowrap">Aidia</span>
     </a>
     <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <button type="button" class="text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none" @click="handleLogin">{{ authStore.hasSession ? 'Logout' : 'Accedi' }}</button>
+        <button type="button" class="rounded-xl border border-[#8594E4]
+         bg-white px-5 py-2
+         font-medium text-[#4C5DB2]
+         shadow-sm
+         hover:bg-[#8594E4] hover:text-white
+         hover:shadow-md
+         transition-all duration-300" @click="handleLogin">{{ authStore.hasSession ? 'Logout' : 'Accedi' }}</button>
     </div>
     <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
       <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-default rounded-base bg-neutral-secondary-soft md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-neutral-primary">

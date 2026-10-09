@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @theme {
-  --color-neutral-primary: #B5C2F2;
+  --color-neutral-primary: #BEDBFF;
   --color-default: #f4f2e8 ;
 }
 
@@ -26,14 +26,13 @@ input,button{
     justify-content: center;
     align-items: center;
 }
-button{
+ button{
  flex: 1;
   padding: 10px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background-color: #8594e4;
-}
+} 
 button:hover{
     background-color: #df73ff;
     color: black;

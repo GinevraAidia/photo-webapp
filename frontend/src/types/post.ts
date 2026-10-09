@@ -11,19 +11,6 @@ export interface PostFormData {
   image: File | null
 }
 
-/* export type Emoji =
-  | 'like'
-  | 'dislike'
-  | 'heart'
-  | 'laugh'
-
-export interface Reaction {
-  id: number
-  post: number
-  user: number
-  username_utente: string
-  emoji: Emoji
-} */
 export interface ReactionType {
   id: number
   name: string
@@ -38,3 +25,15 @@ export interface PostReaction {
   reaction_symbol: string
   username_utente: string
 }
+export interface Event {
+  id: number
+  title: string
+  description: string
+  visibility: 'public' | 'private'
+  users: number[]
+}
+
+export type EventFormData = Pick<
+  Event,
+  'title' | 'description' | 'visibility' | 'users'
+>

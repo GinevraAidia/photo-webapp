@@ -20,21 +20,17 @@ class EventService:
 
     @staticmethod
     @transaction.atomic
-    def update_event(*,event, data: dict,actor) -> Event:
-        if event.owner.id!=actor.id:
-            raise PermissionDenied("You are not the owner of this event")
+    def update_event(event, data, actor):
 
-        data=dict(data)
-        users=data.pop('users',None)
+        for field, value in data.items():
+            if field in ('user', 'users'):
+                event.user.set(value)
+            else:
+                setattr(event, field, value)
 
-        for field,value in data.items():
-            setattr(event,field,value)
         event.save()
-
-        if users is not None:
-            event.users.set(users)
         return event
-
+    
     @staticmethod
     @transaction.atomic
     def delete_event(*,event,actor) -> None:
