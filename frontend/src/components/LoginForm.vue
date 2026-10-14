@@ -16,10 +16,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
 const authStore = useAuthStore()
-
+const userStore=useUserStore()
 const username = ref('')
 const password = ref('')
 const errorMessage = ref('')
@@ -35,7 +36,7 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value,
     })
-    
+    await userStore.setUser(username.value)
    console.log('Login riuscito, reindirizzamento...')
    router.push('/events')
   } catch (err: any) {
@@ -46,4 +47,3 @@ const handleLogin = async () => {
   }
 }
 </script>
-

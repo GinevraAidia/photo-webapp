@@ -43,14 +43,20 @@
     <div v-if="isToggled" class="table-container">
         <EventTable :events="filteredEvents" @delete="deleteEvent" @edit="editEvent" />
     </div>
-    <EventForm
-        v-if="isCreating || editingEvent"
-        :key="editingEvent?.id ?? 'new'"
-        :event="editingEvent"
-        :users="users"
-        @cancel="closeForm"
-        @submit="saveEvent"
-        />
+    <div v-if="isCreating || editingEvent" class="modal-overlay">
+        <EventForm
+            :key="editingEvent?.id ?? 'new'"
+            :initial-title="editingEvent?.title ?? ''"
+            :initial-description="editingEvent?.description ?? ''"
+            :initial-visibility="editingEvent?.visibility ?? 'public'"
+            :initial-users="editingEvent?.users ?? []"
+            :submit-label="editingEvent ? 'Salva modifiche' : 'Crea evento'"
+            :loading="saving"
+            :users="users"
+            @submit="saveEvent"
+            @cancel="closeForm"
+            />
+    </div>
 </template>
 <script setup lang="ts">
 import {ref,onMounted,computed} from 'vue'
@@ -72,6 +78,7 @@ interface User{
     email: string
 }
 const isCreating=ref(false)
+const saving=ref(false)
 const users=ref<User[]>([])
 const events = ref<Event[]>([])
 async function getEvents(){
@@ -100,7 +107,7 @@ function editEvent(event: Event) {
   editingEvent.value = event
 }
 async function saveEvent(data: EventFormData) {
-  console.log('Dati inviati:', data)
+  saving.value = true
 
   try {
     if (editingEvent.value) {
@@ -113,6 +120,8 @@ async function saveEvent(data: EventFormData) {
     closeForm()
   } catch (error) {
     console.error('Errore salvataggio evento:', error)
+  } finally {
+    saving.value = false
   }
 }
 const filteredEvents= computed<Event[]>(()  => {

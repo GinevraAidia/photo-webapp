@@ -17,9 +17,9 @@
 </template>
 <script setup lang="ts">
 import router from '@/router';
-import api from '@/services/api';
-import {ref} from 'vue'
-const isModifying = ref(false)
+/* import api from '@/services/api';
+import {ref} from 'vue' */
+/* const isModifying = ref(false)
 
 const editTitle = ref('')
 const editDescription = ref('')
@@ -27,7 +27,7 @@ const editVisibility = ref('')
 
 const usernameChosen = ref<number | null>(null)
 
-const editUsers = ref<number[]>([])
+const editUsers = ref<number[]>([]) */
 interface User {
     id: number
     username: string
@@ -50,7 +50,7 @@ const emit = defineEmits<{
 function gestisciClick() {
     router.push({ path: '/posts', query: { event: String(props.eventId) } })
 }
-function modificaEvent() {
+/* function modificaEvent() {
     editTitle.value = props.titolo
     editDescription.value = props.descrizione
     editVisibility.value = props.visibilita
@@ -96,8 +96,8 @@ async function salvaModifica() {
     closeForm()
 
     window.location.reload()
-}
-function closeForm() {
+} 
+ function closeForm() {
     isModifying.value = false
 
     editTitle.value = ''
@@ -118,5 +118,5 @@ async function eliminaEvent() {
         alert("Errore durante l'eliminazione dell'evento")
     }
 
-}
+}  */
 </script>

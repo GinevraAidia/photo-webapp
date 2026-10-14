@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import type { Event, EventFormData } from '@/types/post'
+import { ref, computed } from 'vue'
+import type { EventFormData } from '@/types/post'
 
 interface User {
   id: number
@@ -8,107 +8,119 @@ interface User {
   email: string
 }
 
-const props = defineProps<{
-  event: Event | null
-  users: User[]
-}>()
+const props = withDefaults(defineProps<{
+  initialTitle?: string
+  initialDescription?: string
+  initialVisibility?: 'public' | 'private'
+  initialUsers?: number[]
+  submitLabel?: string
+  loading?: boolean
+  users?: User[]
+}>(), {
+  initialTitle: '',
+  initialDescription: '',
+  initialVisibility: 'public',
+  initialUsers: () => [],
+  submitLabel: 'Salva',
+  loading: false,
+  users: () => []
+})
 
 const emit = defineEmits<{
-  cancel: []
   submit: [data: EventFormData]
+  cancel: []
 }>()
 
-const editTitle = ref('')
-const editDescription = ref('')
-const editVisibility = ref<'public' | 'private'>('public')
-const editUsers = ref<number[]>([])
-const usernameChosen = ref<number | null>(null)
+const title = ref(props.initialTitle)
+const description = ref(props.initialDescription)
+const visibility = ref<'public' | 'private'>(props.initialVisibility)
+const selectedUsers = ref<number[]>([...props.initialUsers])
+const chosenUser = ref<number | null>(null)
 
-watch(
-  () => props.event,
-  (event) => {
-    editTitle.value = event?.title ?? ''
-    editDescription.value = event?.description ?? ''
-    editVisibility.value = event?.visibility ?? 'public'
-    editUsers.value = [...(event?.users ?? [])]
-    usernameChosen.value = null
-  },
-  { immediate: true }
-)
+const usersMap = computed(() => {
+  return new Map(props.users.map(user => [user.id, user.username]))
+})
 
 function addUserToList() {
-  if (
-    usernameChosen.value !== null &&
-    !editUsers.value.includes(usernameChosen.value)
-  ) {
-    editUsers.value.push(usernameChosen.value)
+  if (chosenUser.value !== null && !selectedUsers.value.includes(chosenUser.value)) {
+    selectedUsers.value.push(chosenUser.value)
   }
+  chosenUser.value = null
+}
 
-  usernameChosen.value = null
+function removeUserFromList(userId: number) {
+  selectedUsers.value = selectedUsers.value.filter(id => id !== userId)
 }
 
 function onSubmit() {
   emit('submit', {
-    title: editTitle.value,
-    description: editDescription.value,
-    visibility: editVisibility.value,
-    users: editUsers.value
+    title: title.value,
+    description: description.value,
+    visibility: visibility.value,
+    users: selectedUsers.value
   })
 }
 </script>
 
 <template>
-  <div class="modal-overlay">
     <div class="event-form" @click.stop>
-      <button class="close-btn" @click="emit('cancel')">×</button>
-
-      <h2>{{ event ? 'Modifica evento' : 'Nuovo evento' }}</h2>
-
         <form @submit.prevent="onSubmit">
-        <input v-model="editTitle" type="text" placeholder="Titolo" required />
+            <input
+            v-model="title"
+            type="text"
+            placeholder="Titolo"
+            required
+            :disabled="loading"
+            />
 
-        <input
-          v-model="editDescription"
-          type="text"
-          placeholder="Descrizione"
-        />
+            <input
+            v-model="description"
+            type="text"
+            placeholder="Descrizione"
+            :disabled="loading"
+            />
 
-        <select v-model="editVisibility">
-          <option value="public">Pubblico</option>
-          <option value="private">Privato</option>
-        </select>
+            <select v-model="visibility" :disabled="loading">
+                <option value="public">Pubblico</option>
+                <option value="private">Privato</option>
+            </select>
 
-        <span>Seleziona gli utenti</span>
+            <label for="user-select">Seleziona gli utenti</label>
+            <select
+            id="user-select"
+            v-model="chosenUser"
+            :disabled="loading"
+            @change="addUserToList"
+            >
+                <option :value="null" disabled selected>Seleziona un utente</option>
+                <option v-for="user in users" :key="user.id" :value="user.id">
+                    {{ user.username }}
+                </option>
+            </select>
 
-        <select v-model="usernameChosen" @change="addUserToList">
-          <option :value="null" disabled>Seleziona un utente</option>
-          <option
-            v-for="user in users"
-            :key="user.id"
-            :value="user.id"
-          >
-            {{ user.username }}
-          </option>
-        </select>
+            <div v-if="selectedUsers.length > 0" class="selected-users">
+                <p>Utenti selezionati:</p>
+                <ul>
+                    <li v-for="userId in selectedUsers" :key="userId">
+                        {{ usersMap.get(userId) || 'Utente sconosciuto' }}
+                        <button
+                        type="button"
+                        :disabled="loading"
+                        @click="removeUserFromList(userId)"
+                        >
+                            ×
+                        </button>
+                    </li>
+                </ul>
+            </div>
 
-        <div v-if="editUsers.length > 0">
-          <p>Utenti selezionati:</p>
-          <ul>
-            <li v-for="userId in editUsers" :key="userId">
-              {{ users.find(user => user.id === userId)?.username }}
-              <button
-                type="button"
-                @click="editUsers = editUsers.filter(id => id !== userId)"
-              >
-                ×
-              </button>
-            </li>
-          </ul>
-        </div>
-        <button type="submit">
-        {{ event ? 'Salva modifiche' : 'Crea evento' }}
-        </button>
-      </form>
+            <button type="submit" :disabled="loading">
+                {{ loading ? 'Salvataggio...' : submitLabel }}
+            </button>
+
+            <button type="button" @click="emit('cancel')">
+                Annulla
+            </button>
+        </form>
     </div>
-  </div>
 </template>
