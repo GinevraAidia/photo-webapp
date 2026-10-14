@@ -16,11 +16,16 @@
             <span class="select-none ms-3 text-sm font-medium text-heading">Table</span>
             </label>
         </div>
-
     </div>
+    <div class="flex items-center max-w-lg mx-auto space-x-2">   
+          <label for="voice-search" class="sr-only">Search</label>
+          <div class="relative w-full">
+              <input type="text" id="voice-search" v-model="searchQuery" class="block w-full ps-9 pe-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" placeholder="Search Title or Description" required />
+          </div>
+        </div>
     <div v-if="!isToggled" class="cards-container">
         <EventCard class="card"
-            v-for="event in events"
+            v-for="event in filteredEvents"
             :key="event.id"
             :eventId="event.id"
             :titolo="event.title"
@@ -36,7 +41,7 @@
             />
     </div>
     <div v-if="isToggled" class="table-container">
-        <EventTable :events="events" @delete="deleteEvent" @edit="editEvent" />
+        <EventTable :events="filteredEvents" @delete="deleteEvent" @edit="editEvent" />
     </div>
     <EventForm
         v-if="isCreating || editingEvent"
@@ -48,7 +53,7 @@
         />
 </template>
 <script setup lang="ts">
-import {ref,onMounted} from 'vue'
+import {ref,onMounted,computed} from 'vue'
 import api from '@/services/api'
 import EventCard from '@/components/EventCard.vue'
 import { eventService } from '@/services/eventService'
@@ -58,6 +63,8 @@ import EventForm from '@/components/EventForm.vue'
 
 const editingEvent = ref<Event | null>(null)
 const isToggled = ref(false)
+
+const searchQuery = ref('');
 
 interface User{
     id: number
@@ -108,6 +115,10 @@ async function saveEvent(data: EventFormData) {
     console.error('Errore salvataggio evento:', error)
   }
 }
+const filteredEvents= computed<Event[]>(()  => {
+  console.log(searchQuery.value)
+  return events.value.filter((event: { title: string | string[]; description: string | string[] }) => event.title.includes(searchQuery.value) || event.description.includes(searchQuery.value))
+})
 onMounted(async()=>{
     getEvents()
     getUsers()

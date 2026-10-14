@@ -34,9 +34,8 @@
 </template>
 <script setup lang="ts">
 import EventRow from './EventRow.vue';
-import { onMounted } from 'vue';
 import type { Event } from '@/types/post.ts';
-defineProps<{
+const props= defineProps<{
     events:Event[]
 }>()
 const emit = defineEmits<{
