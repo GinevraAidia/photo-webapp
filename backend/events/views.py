@@ -9,7 +9,6 @@ from events.models import *
 from .serializers import *
 from .permission import *
 from django.contrib.auth import get_user_model
-from django.views.generic.edit import DeleteView
 User=get_user_model()
 
 class UserViewSet(viewsets.ModelViewSet):
