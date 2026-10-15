@@ -1,9 +1,10 @@
 from xml.dom import ValidationErr
 
+from django.contrib.admin import action
 from rest_framework import viewsets,permissions
 from rest_framework import status
 from rest_framework.response import Response
-from events.services import EventService, PostService, PostReactionService
+from events.services import UserService,EventService, PostService, PostReactionService
 from events.models import *
 from .serializers import *
 from .permission import *
@@ -11,16 +12,26 @@ from django.contrib.auth import get_user_model
 from django.views.generic.edit import DeleteView
 User=get_user_model()
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("username")
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ["patch","get"]
+    def get_object(self):
+        return self.request.user
+    def perform_update(self, serializer):
+        user = UserService.update_user(
+            user=self.request.user,
+            data=serializer.validated_data,
+            actor=self.request.user
+        )
+        serializer.instance = user
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
     def get_queryset(self):
-            return can_view_event(self.request.user).select_related("owner").prefetch_related("user")
+        return can_view_event(self.request.user).select_related("owner").prefetch_related("user")
 
     def perform_create(self, serializer):
         event = EventService.create_event(

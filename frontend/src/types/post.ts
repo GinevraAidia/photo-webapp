@@ -37,3 +37,7 @@ export type EventFormData = Pick<
   Event,
   'title' | 'description' | 'visibility' | 'users'
 >
+export interface UserFormData{
+  username: string,
+  email: string
+}

@@ -1,10 +1,10 @@
-<template>
+<template >
     <div class="login-container">
-        <form @submit.prevent="handleLogin" class="space-y-8 m-4">
+        <form @submit.prevent="handleLogin" class="space-y-8 m-4 px-4  flex-col justify-center items-center ">
             <input v-model="username" type="text" placeholder="Username" class="rounded-xl border border-[#8594E4] bg-white px-5 py-2 font-medium text-[#4C5DB2] shadow-sm hover:bg-[#8594E4] hover:text-white hover:shadow-md transition-all duration-300"/>
             <input v-model="password" type="password" placeholder="Password" class="rounded-xl border border-[#8594E4] bg-white px-5 py-2 font-medium text-[#4C5DB2] shadow-sm hover:bg-[#8594E4] hover:text-white hover:shadow-md transition-all duration-300" />
         
-            <button type="submit" :disabled="loading" class="rounded-xl border border-[#8594E4] bg-white px-5 py-2 font-medium text-[#4C5DB2] shadow-sm hover:bg-[#8594E4] hover:text-white hover:shadow-md transition-all duration-300">
+            <button type="submit" :disabled="loading" class=" rounded-xl border border-[#8594E4] bg-white px-5 py-2 font-medium text-[#4C5DB2] shadow-sm hover:bg-[#8594E4] hover:text-white">
             {{ loading ? 'Accesso in corso...' : 'Login' }}
             </button>
             <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>

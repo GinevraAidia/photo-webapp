@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { EventFormData } from '@/types/post'
+import { ref, watch, computed } from 'vue'
+import type { Event, EventFormData } from '@/types/post'
+import { eventService } from '@/services/eventService'
 
 interface User {
   id: number
@@ -8,119 +9,127 @@ interface User {
   email: string
 }
 
-const props = withDefaults(defineProps<{
-  initialTitle?: string
-  initialDescription?: string
-  initialVisibility?: 'public' | 'private'
-  initialUsers?: number[]
-  submitLabel?: string
-  loading?: boolean
-  users?: User[]
-}>(), {
-  initialTitle: '',
-  initialDescription: '',
-  initialVisibility: 'public',
-  initialUsers: () => [],
-  submitLabel: 'Salva',
-  loading: false,
-  users: () => []
-})
-
-const emit = defineEmits<{
-  submit: [data: EventFormData]
-  cancel: []
+const props = defineProps<{
+  event: Event | null
+  users: User[]
 }>()
 
-const title = ref(props.initialTitle)
-const description = ref(props.initialDescription)
-const visibility = ref<'public' | 'private'>(props.initialVisibility)
-const selectedUsers = ref<number[]>([...props.initialUsers])
-const chosenUser = ref<number | null>(null)
+const emit = defineEmits<{
+  cancel: []
+  saved: [] // Segnala al genitore che il DB è stato aggiornato con successo
+}>()
+
+const editTitle = ref('')
+const editDescription = ref('')
+const editVisibility = ref<'public' | 'private'>('public')
+const editUsers = ref<number[]>([])
+const usernameChosen = ref<number | null>(null)
+
+// Gestione stato di caricamento durante la chiamata di rete
+const isSaving = ref(false)
 
 const usersMap = computed(() => {
   return new Map(props.users.map(user => [user.id, user.username]))
 })
 
+watch(
+  () => props.event, //funzione getter per il valore da osservare (dinamica)
+  (event) => { //funz eseguita quando il valore cambia
+    editTitle.value = event?.title ?? ''
+    editDescription.value = event?.description ?? ''
+    editVisibility.value = event?.visibility ?? 'public'
+    editUsers.value = event?.users ? [...event.users] : []
+    usernameChosen.value = null
+  },
+  { immediate: true }
+)
+
 function addUserToList() {
-  if (chosenUser.value !== null && !selectedUsers.value.includes(chosenUser.value)) {
-    selectedUsers.value.push(chosenUser.value)
+  if (usernameChosen.value !== null && !editUsers.value.includes(usernameChosen.value)) {
+    editUsers.value.push(usernameChosen.value)
   }
-  chosenUser.value = null
+  usernameChosen.value = null
 }
 
 function removeUserFromList(userId: number) {
-  selectedUsers.value = selectedUsers.value.filter(id => id !== userId)
+  editUsers.value = editUsers.value.filter(id => id !== userId)
 }
 
-function onSubmit() {
-  emit('submit', {
-    title: title.value,
-    description: description.value,
-    visibility: visibility.value,
-    users: selectedUsers.value
-  })
+async function onSubmit() {
+  isSaving.value = true
+
+  const payload: EventFormData = {
+    title: editTitle.value,
+    description: editDescription.value,
+    visibility: editVisibility.value,
+    users: editUsers.value
+  }
+
+  try {
+    if (props.event?.id) {
+      await eventService.update(props.event.id, payload)
+    } else {
+      await eventService.create(payload)
+    }
+
+    // Notifica il genitore per aggiornare la lista e chiude il modale
+    emit('saved')
+    emit('cancel')
+
+  } catch (error) {
+    console.error('Errore durante la chiamata API:', error)
+    alert('Impossibile salvare i dati a database. Controlla che il backend su localhost:8000 sia attivo.')
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
 
 <template>
+  <div class="modal-overlay" @click="emit('cancel')">
     <div class="event-form" @click.stop>
-        <form @submit.prevent="onSubmit">
-            <input
-            v-model="title"
-            type="text"
-            placeholder="Titolo"
-            required
-            :disabled="loading"
-            />
+      <button type="button" class="close-btn" :disabled="isSaving" @click="emit('cancel')">×</button>
 
-            <input
-            v-model="description"
-            type="text"
-            placeholder="Descrizione"
-            :disabled="loading"
-            />
+      <h2>{{ event ? 'Modifica evento' : 'Nuovo evento' }}</h2>
 
-            <select v-model="visibility" :disabled="loading">
-                <option value="public">Pubblico</option>
-                <option value="private">Privato</option>
-            </select>
+      <form @submit.prevent="onSubmit">
+        <input v-model="editTitle" type="text" placeholder="Titolo" required :disabled="isSaving" />
 
-            <label for="user-select">Seleziona gli utenti</label>
-            <select
-            id="user-select"
-            v-model="chosenUser"
-            :disabled="loading"
-            @change="addUserToList"
-            >
-                <option :value="null" disabled selected>Seleziona un utente</option>
-                <option v-for="user in users" :key="user.id" :value="user.id">
-                    {{ user.username }}
-                </option>
-            </select>
+        <input v-model="editDescription" type="text" placeholder="Descrizione" :disabled="isSaving" />
 
-            <div v-if="selectedUsers.length > 0" class="selected-users">
-                <p>Utenti selezionati:</p>
-                <ul>
-                    <li v-for="userId in selectedUsers" :key="userId">
-                        {{ usersMap.get(userId) || 'Utente sconosciuto' }}
-                        <button
-                        type="button"
-                        :disabled="loading"
-                        @click="removeUserFromList(userId)"
-                        >
-                            ×
-                        </button>
-                    </li>
-                </ul>
-            </div>
+        <select v-model="editVisibility" :disabled="isSaving">
+          <option value="public">Pubblico</option>
+          <option value="private">Privato</option>
+        </select>
 
-            <button type="submit" :disabled="loading">
-                {{ loading ? 'Salvataggio...' : submitLabel }}
-            </button>
+        <label for="user-select">Seleziona gli utenti</label>
+        <select id="user-select" v-model="usernameChosen" :disabled="isSaving" @change="addUserToList">
+          <option :value="null" disabled selected>Seleziona un utente</option>
+          <option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.username }}
+          </option>
+        </select>
 
-            <button type="button" @click="emit('cancel')">
-                Annulla
-            </button>
-        </form>
+        <div v-if="editUsers.length > 0" class="selected-users">
+          <p>Utenti selezionati:</p>
+          <ul>
+            <li v-for="userId in editUsers" :key="userId">
+              {{ usersMap.get(userId) || 'Utente sconosciuto' }}
+              <button 
+                type="button" 
+                :disabled="isSaving" 
+                @click="removeUserFromList(userId)"
+              >
+                ×
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <button type="submit" :disabled="isSaving">
+          {{ isSaving ? 'Salvataggio...' : (event ? 'Salva modifiche' : 'Crea evento') }}
+        </button>
+      </form>
     </div>
+  </div>
 </template>

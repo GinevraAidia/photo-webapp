@@ -23,7 +23,7 @@ export const eventService = {
   // GET: recupera un singolo evento
   async getById(id: number): Promise<Event> {
     const response = await api.get<Event>(
-      `/events/event/${id}/`
+      '/events/event/${id}/'
     )
 
     return response.data
@@ -33,16 +33,17 @@ export const eventService = {
   async delete(id: number): Promise<void> {
     await api.delete(`/events/event/${id}/`)
   },
-
+  // PATCH: aggiorna un evento
   async update(id: number, data: EventFormData): Promise<Event> {
-  const response = await api.patch<Event>(
-    `/events/event/${id}/`,
-    data
-  )
-  return response.data
-    },
-    async create(data: EventFormData): Promise<Event> {
-        const response = await api.post<Event>('/events/event/', data)
-        return response.data
-    }
+    const response = await api.patch<Event>(
+      `/events/event/${id}/`,
+      data
+      )
+      return response.data
+  },
+  //POST: crea un evento
+  async create(data: EventFormData): Promise<Event> {
+      const response = await api.post<Event>('/events/event/', data)
+      return response.data
+  }
 }

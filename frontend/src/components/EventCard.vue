@@ -17,17 +17,6 @@
 </template>
 <script setup lang="ts">
 import router from '@/router';
-/* import api from '@/services/api';
-import {ref} from 'vue' */
-/* const isModifying = ref(false)
-
-const editTitle = ref('')
-const editDescription = ref('')
-const editVisibility = ref('')
-
-const usernameChosen = ref<number | null>(null)
-
-const editUsers = ref<number[]>([]) */
 interface User {
     id: number
     username: string
@@ -50,73 +39,4 @@ const emit = defineEmits<{
 function gestisciClick() {
     router.push({ path: '/posts', query: { event: String(props.eventId) } })
 }
-/* function modificaEvent() {
-    editTitle.value = props.titolo
-    editDescription.value = props.descrizione
-    editVisibility.value = props.visibilita
-
-    // Copia gli utenti già presenti nell'evento
-    editUsers.value = [...props.eventUsers]
-
-    usernameChosen.value = null
-
-    isModifying.value = true
-}
-
-function addUserToList() {
-    if (
-        usernameChosen.value !== null &&
-        !editUsers.value.includes(usernameChosen.value)
-    ) {
-        editUsers.value.push(usernameChosen.value)
-    }
-}
-function getUsername(userId: number) {
-    return props.users.find(
-        user => user.id === userId
-    )?.username
-}
-async function salvaModifica() {
-    try {
-        await api.patch(
-            `/events/event/${props.eventId}/`,
-            {
-                title: editTitle.value,
-                description: editDescription.value,
-                visibility: editVisibility.value,
-                users: editUsers.value
-            }
-        )
-
-
-    } catch (error) {
-        console.error(error)
-    }
-    
-    closeForm()
-
-    window.location.reload()
-} 
- function closeForm() {
-    isModifying.value = false
-
-    editTitle.value = ''
-    editDescription.value = ''
-    editVisibility.value = ''
-
-    usernameChosen.value = null
-    editUsers.value = []
-}
-
-async function eliminaEvent() {
-    alert("Sicuro di voler eliminare l'evento? verranno eliminati anche tutti i post associati.\n Attenzione solo il proprietario dell'evento è autorizzato a farlo")
-    try{
-        await api.delete(`/events/event/${props.eventId}/`)
-        window.location.reload()
-    }catch(error){
-        console.log(error)
-        alert("Errore durante l'eliminazione dell'evento")
-    }
-
-}  */
 </script>

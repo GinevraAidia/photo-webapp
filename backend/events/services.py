@@ -111,3 +111,16 @@ class PostReactionService:
             )
 
         reaction.delete()
+
+class UserService:
+    @staticmethod
+    @transaction.atomic
+    def update_user(user, data, actor):
+        if user.id != actor.id:
+            raise PermissionDenied("Non puoi modificare questo utente.")
+
+        for field, value in data.items():
+            setattr(user, field, value)
+
+        user.save()
+        return user

@@ -1,5 +1,5 @@
 <template>
-    <div class="login-view">
+    <div class="flex justify-center items-center" >
         <LoginForm/>
     </div>
 </template>
@@ -9,13 +9,5 @@ import LoginForm from '@/components/LoginForm.vue';
 </script>
 
 <style>
-.login-view {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    padding-top: 20px;
-    box-sizing: border-box;
-}
 </style>
 

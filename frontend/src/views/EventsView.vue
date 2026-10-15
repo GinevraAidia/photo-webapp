@@ -43,20 +43,14 @@
     <div v-if="isToggled" class="table-container">
         <EventTable :events="filteredEvents" @delete="deleteEvent" @edit="editEvent" />
     </div>
-    <div v-if="isCreating || editingEvent" class="modal-overlay">
-        <EventForm
-            :key="editingEvent?.id ?? 'new'"
-            :initial-title="editingEvent?.title ?? ''"
-            :initial-description="editingEvent?.description ?? ''"
-            :initial-visibility="editingEvent?.visibility ?? 'public'"
-            :initial-users="editingEvent?.users ?? []"
-            :submit-label="editingEvent ? 'Salva modifiche' : 'Crea evento'"
-            :loading="saving"
-            :users="users"
-            @submit="saveEvent"
-            @cancel="closeForm"
-            />
-    </div>
+    <EventForm
+        v-if="isCreating || editingEvent"
+        :key="editingEvent?.id ?? 'new'"
+        :event="editingEvent"
+        :users="users"
+        @saved="getEvents"
+        @cancel="closeForm"
+    />
 </template>
 <script setup lang="ts">
 import {ref,onMounted,computed} from 'vue'
@@ -64,7 +58,7 @@ import api from '@/services/api'
 import EventCard from '@/components/EventCard.vue'
 import { eventService } from '@/services/eventService'
 import EventTable from '@/components/EventTable.vue'
-import type { Event, EventFormData } from '@/types/post'
+import type { Event } from '@/types/post'
 import EventForm from '@/components/EventForm.vue'
 
 const editingEvent = ref<Event | null>(null)
@@ -78,8 +72,7 @@ interface User{
     email: string
 }
 const isCreating=ref(false)
-const saving=ref(false)
-const users=ref<User[]>([])
+const users=ref<User[]>([]) 
 const events = ref<Event[]>([])
 async function getEvents(){
     const response = await api.get('/events/event/')
@@ -105,24 +98,6 @@ async function deleteEvent(id: number) {
 function editEvent(event: Event) {
   isCreating.value = false
   editingEvent.value = event
-}
-async function saveEvent(data: EventFormData) {
-  saving.value = true
-
-  try {
-    if (editingEvent.value) {
-      await eventService.update(editingEvent.value.id, data)
-    } else {
-      await eventService.create(data)
-    }
-
-    await getEvents()
-    closeForm()
-  } catch (error) {
-    console.error('Errore salvataggio evento:', error)
-  } finally {
-    saving.value = false
-  }
 }
 const filteredEvents= computed<Event[]>(()  => {
   console.log(searchQuery.value)

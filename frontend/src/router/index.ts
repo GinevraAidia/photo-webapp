@@ -5,7 +5,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: () => import('../views/LoginView.vue')
+      component: () => import('../views/EventsView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/login',
@@ -33,5 +34,9 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth &&!authStore.hasSession) {
   return '/login'
   }
+  if(to.path === '/login' && authStore.hasSession){
+    return '/'
+  }
+  return true
 })
 export default router

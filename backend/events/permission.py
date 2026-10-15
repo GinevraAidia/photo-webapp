@@ -22,22 +22,6 @@ def can_view_event(user) -> QuerySet[Event]:
         raise PermissionDenied("You must be logged in to view events.") 
     return Event.objects.filter(Q(visibility="public") | Q(owner=user) | Q(user=user)).distinct()
 
-""" class IsOwnerOrReadOnly(permissions.BasePermission):
-    
-    Tutti possono vedere (GET/HEAD/OPTIONS),
-    ma solo il proprietario può modificare o eliminare (PUT/PATCH/DELETE).
-    
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-            
-        if not request.user or not request.user.is_authenticated:
-            return False
-
-        obj_owner = getattr(obj, 'owner', None) or getattr(obj, 'uploader', None) or getattr(obj, 'user', None)
-
-        return obj_owner == request.user """
-
 class isPostOwnerOrEventOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:

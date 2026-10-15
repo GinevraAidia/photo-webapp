@@ -22,5 +22,7 @@ h1{
 }
 #container{
   padding-top: 100px;
+  justify-content: center;
+  flex: auto;
 }
 </style>
