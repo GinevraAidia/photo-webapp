@@ -22,15 +22,14 @@
 
   <div class="flex items-center max-w-lg mx-auto space-x-2 my-4">   
     <label for="voice-search" class="sr-only">Search</label>
-    <div class="relative w-full">
-      <input 
+    <div class="flex items-stretch w-full max-w-md">
+        <input 
         type="text" 
         id="voice-search" 
         v-model="searchQuery" 
-        class="block w-full px-4 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-xl focus:ring-[#8594E4] focus:border-[#8594E4] shadow-xs" 
-        placeholder="Cerca per titolo o descrizione..." 
-      />
-      <button @click=filterEvents>Search</button>
+        class="flex w-full px-4 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-xl focus:ring-[#8594E4] focus:border-[#8594E4] shadow-xs" 
+        placeholder="Cerca per titolo o descrizione..." />
+        <button @click=filterEvents class="rounded-xl border border-[#8594E4] bg-white px-5 py-2 font-small text-[#4C5DB2] shadow-sm hover:bg-[#8594E4] hover:text-white hover:shadow-md">Search</button>
     </div>
   </div>
     
@@ -169,16 +168,13 @@ function goToPage(page: number) {
     getEvents(page)
   }
 }
-//Da modificare per query a db
+
 async function filterEvents() {
-    /* events.value.filter(event => {
-      return event.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-             event.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-    }) */
    try{
     const response =await api.get('/events/event/', {
       params: {
-        search: searchQuery.value
+        search: searchQuery.value,
+        filter_scope: 'custom_search'
       }
     })
     events.value = response.data.results ?? response.data
@@ -186,6 +182,7 @@ async function filterEvents() {
    } catch (error) {
     console.error('Errore nel recupero eventi:', error)
    }
+   searchQuery.value = ''
 }
 
 async function getUsers() {

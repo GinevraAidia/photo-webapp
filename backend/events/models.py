@@ -29,7 +29,7 @@ class Reaction(models.Model):
     symbol=models.CharField(max_length=10)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.symbol}"
     
 class PostReaction(models.Model):
      post=models.ForeignKey(Post, related_name='post_reactions', on_delete=models.CASCADE)

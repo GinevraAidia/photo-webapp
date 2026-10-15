@@ -2,13 +2,16 @@ from xml.dom import ValidationErr
 
 from django.contrib.admin import action
 from rest_framework import viewsets,permissions
-from rest_framework import status
 from rest_framework.response import Response
 from events.services import UserService,EventService, PostService, PostReactionService
 from events.models import *
 from .serializers import *
 from .permission import *
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+from django.core.paginator import Paginator
+from rest_framework.pagination import PageNumberPagination
+
 User=get_user_model()
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -26,35 +29,52 @@ class UserViewSet(viewsets.ModelViewSet):
         )
         serializer.instance = user
 
+
+
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    filter_backends = [] 
+    
     def get_queryset(self):
-        return can_view_event(self.request.user).select_related("owner").prefetch_related("user")
+        queryset = can_view_event(self.request.user).select_related("owner").prefetch_related("user")
+        
+        search_query = self.request.query_params.get('search', None)
+        filter_scope = self.request.query_params.get('filter_scope', None)
+        if filter_scope == 'custom_search' and search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | Q(description__icontains=search_query)
+            )
+        return queryset
 
     def perform_create(self, serializer):
         event = EventService.create_event(
-        owner=self.request.user,
-        data=serializer.validated_data
+            owner=self.request.user,
+            data=serializer.validated_data
         )
-
         serializer.instance = event
 
     def perform_update(self, serializer):
-        event= EventService.update_event(
+        event = EventService.update_event(
             event=self.get_object(),
             data=serializer.validated_data,
             actor=self.request.user
         )
-        serializer.instance=event
+        serializer.instance = event
         
     def perform_destroy(self, instance):
-        EventService.delete_event(event=instance,actor=self.request.user)
+        EventService.delete_event(event=instance, actor=self.request.user)
 
+class PostPagination(PageNumberPagination):
+    page_size = 2
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated,isPostOwnerOrEventOwner]
-    
+    # type() è la metaclasse fondamentale utilizzata per creare nuove classi a runtime
+    #costringi Python a generare e registrare quella classe esattamente nel momento in cui
+    #  il ViewSet viene creato in memoria, impedendo a Django di applicare il PAGE_SIZE = 6
+    pagination_class = type('DynamicPostPagination', (PageNumberPagination,), {'page_size': 2})
     def get_queryset(self):
         queryset = Post.objects.filter(event__in=can_view_event(self.request.user)).select_related("event","uploader")
         event_id = self.request.query_params.get('event')
@@ -94,7 +114,6 @@ class ReactionViewSet(viewsets.ModelViewSet):
 class PostReactionViewSet(viewsets.ModelViewSet):
     serializer_class = PostReactionSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     http_method_names=["get","post","delete","head","options"]
     def get_queryset(self):
         queryset = PostReaction.objects.filter(

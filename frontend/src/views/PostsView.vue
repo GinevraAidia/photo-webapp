@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 
 import PostCard from '@/components/PostCard.vue'
 import PostForm from '@/components/PostForm.vue'
-import { postService } from '@/services/postService'
 import type { Post } from '@/types/post'
 import api from '@/services/api'
 
@@ -23,7 +22,7 @@ const event = ref<EventData | null>(null)
 
 const currentPage = ref(1)
 const totalCount = ref(0)
-const perPage = ref(6) // 6 post per pagina
+const perPage = ref(2) 
 
 const totalPages = computed(() => {
   return Math.ceil(totalCount.value / perPage.value) || 1
@@ -121,10 +120,7 @@ watch(eventId, () => {
     <div class="grid grid-cols-3 items-center mb-6">
       <button 
         @click="isCreating = true" 
-        class="justify-self-start px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        Nuovo post
-      </button> 
+        class="w-15 text-3xl rounded-xs border border-[#8594E4] bg-white px-5 py-2 font-medium text-[#4C5DB2] shadow-sm hover:bg-[#8594E4] hover:text-white">+</button>
       <h1 class="text-center text-3xl font-bold tracking-tight text-heading md:text-4xl">
         {{ event?.title ?? 'Caricamento evento...' }}
       </h1>

@@ -1,0 +1,22 @@
+[
+    {
+        "model": "events.reaction", 
+        "pk": 1, 
+        "fields": {"name": "like", "symbol": "👍"}
+    }, 
+    {
+        "model": "events.reaction", 
+        "pk": 2, 
+        "fields": {"name": "heart", "symbol": "❤️"}
+    }, 
+    {
+        "model": "events.reaction", 
+        "pk": 3, 
+        "fields": {"name": "laugh", "symbol": "😂"}
+    }, 
+    {
+        "model": "events.reaction", 
+        "pk": 4, 
+        "fields": {"name": "dislike", "symbol": "👎"}
+    }
+]
